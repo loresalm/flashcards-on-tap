@@ -1,5 +1,5 @@
 Flashcards On Tap 🃏⚡
-Your personal memory card service that's always ready when you are! This repository demonstrates how to build and host a completely free flashcard web app using GitHub Pages and Firebase. No subscriptions, no limits, no catch - just unlimited flashcards available 24/7 from any device.
+Your personal memory card service that's always ready when you are! This repository demonstrates how to build and host a completely free flashcard web app using GitHub Pages and Firebase. No subscripåtions, no limits, no catch - just unlimited flashcards available 24/7 from any device.
 ✨ Features:
 
 100% free hosting forever
@@ -9,3 +9,10 @@ Built with GitHub Pages + Firebase
 No server costs or maintenance headaches
 
 Perfect for students, professionals, or anyone who wants their study materials always at their fingertips. Tap into unlimited learning potential without spending a dime!
+
+/memory-cards
+  ├── index.html
+  ├── styles.css
+  ├── script.js
+  ├── firebase-config.js
+  └── 404.html (for GitHub Pages SPA)
