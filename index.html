@@ -1,35 +1,35 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Memory Cards</title>
-  <link rel="stylesheet" href="styles.css">
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Deutsch → Italiano Quiz</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Memory Cards</h1>
-      <div class="score">Score: <span id="score">0</span></div>
-    </header>
-    
-    <div class="card-container">
-      <div class="card" id="card">
-        <div class="question" id="question">Loading question...</div>
-        <div class="answers" id="answers">
-          <!-- Answers will be inserted here by JavaScript -->
-        </div>
-        <div class="feedback" id="feedback"></div>
-      </div>
-      
-      <button id="next-btn" class="btn hidden">Next Card</button>
+  <div class="card">
+    <h1>Deutsch → Italiano Quiz</h1>
+    <div class="meta">
+      <div class="small">Mode:</div>
+      <select id="mode" class="mode">
+        <option value="random">random</option>
+        <option value="difficult">difficult</option>
+      </select>
+      <div class="small" id="progress">—</div>
     </div>
+
+    <p class="q" id="question">Loading…</p>
+    <div class="answers" id="answers"></div>
+
+    <div class="controls">
+      <button id="next">Next</button>
+      <div class="small" id="lastResult"></div>
+    </div>
+
+    <hr />
+    <div class="small">(Note: score for a sentence increases +1 when the user answers incorrectly and decreases −1 when the user answers correctly.)</div>
   </div>
 
-  <script src="firebase-config.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="app.js"></script>
 </body>
 </html>

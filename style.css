@@ -1,0 +1,67 @@
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  margin: 24px;
+  display: flex;
+  justify-content: center;
+}
+
+.card {
+  max-width: 720px;
+  width: 100%;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, .08);
+}
+
+h1 {
+  font-size: 20px;
+  margin: 0 0 10px;
+}
+
+p.q {
+  font-size: 22px;
+  margin: 18px 0;
+}
+
+.answers {
+  display: grid;
+  gap: 8px;
+}
+
+button.answer {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  text-align: left;
+}
+
+.meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.small {
+  font-size: 13px;
+  color: #555;
+}
+
+.correct {
+  border-color: green;
+}
+
+.wrong {
+  border-color: red;
+}
+
+.controls {
+  margin-top: 14px;
+  display: flex;
+  gap: 8px;
+}
+
+.mode {
+  margin-left: auto;
+}
