@@ -1,11 +1,12 @@
-import { firebaseConfig } from "./firebase-config.js";
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
+const firebaseConfig = {
+  apiKey: "AIzaSyDoarG7jt0kIUgHBzW8TDZhv9c-ZpdE6JA",
+  authDomain: "flashcards-on-tap.firebaseapp.com",
+  databaseURL: "https://flashcards-on-tap-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "flashcards-on-tap",
+  storageBucket: "flashcards-on-tap.firebasestorage.app",
+  messagingSenderId: "1045049294286",
+  appId: "1:1045049294286:web:d0b4c3db360f31175ebf9f"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
