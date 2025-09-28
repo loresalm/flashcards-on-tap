@@ -32,6 +32,7 @@ function shuffle(a){
 async function loadQuestions(){
   const col = collection(db,'questions');
   const snap = await getDocs(col);
+  console.log("Docs found:", snap.size);
   questions = snap.docs.map(d => ({id: d.id, ...d.data()}));
   if(!questions.length){
     qEl.textContent = 'No questions found in Firestore. See README to seed sample data.';
