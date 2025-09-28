@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Deutsch → Italiano Quiz</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="card">
+    <h1>Deutsch → Italiano Quiz</h1>
+    <div class="meta">
+      <div class="small">Mode:</div>
+      <select id="mode" class="mode">
+        <option value="random">random</option>
+        <option value="difficult">difficult</option>
+      </select>
+      <div class="small" id="progress">—</div>
+    </div>
+
+    <p class="q" id="question">Loading…</p>
+    <div class="answers" id="answers"></div>
+
+    <div class="controls">
+      <button id="next">Next</button>
+      <div class="small" id="lastResult"></div>
+    </div>
+
+    <hr />
+    <div class="small">(Note: score for a sentence increases +1 when the user answers incorrectly and decreases −1 when the user answers correctly.)</div>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
