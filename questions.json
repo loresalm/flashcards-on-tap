@@ -1,0 +1,14 @@
+[
+  {
+    "german": "Guten Morgen",
+    "options": ["Buongiorno", "Buona notte", "Grazie"],
+    "correctIndex": 0,
+    "score": 0
+  },
+  {
+    "german": "Danke schön",
+    "options": ["Per favore", "Grazie mille", "Buon appetito"],
+    "correctIndex": 1,
+    "score": 0
+  }
+]

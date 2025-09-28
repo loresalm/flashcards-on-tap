@@ -1,0 +1,24 @@
+{
+  "name": "flashcards-on-tap",
+  "version": "1.0.0",
+  "description": "1. Create a Firebase project in the Firebase console. 2. Enable **Firestore** (in test mode while developing). 3. In Firestore create a collection named `questions` and add documents with this structure:",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/loresalm/flashcards-on-tap.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/loresalm/flashcards-on-tap/issues"
+  },
+  "homepage": "https://github.com/loresalm/flashcards-on-tap#readme",
+  "dependencies": {
+    "firebase": "^12.3.0"
+  }
+}
