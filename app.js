@@ -120,10 +120,9 @@ function renderQuestion(){
   updateProgress();
 }
 
-// Handle answer click
 async function handleAnswer(question, selectedAnswer, btnElement){
   Array.from(answersEl.children).forEach(b=>b.disabled=true);
-  const correct = (selectedAnswer === question.correct);
+  const correct = selectedAnswer.trim() === question.correct.trim(); // <-- trimmed
 
   if(correct){
     btnElement.classList.add('correct');
@@ -131,9 +130,8 @@ async function handleAnswer(question, selectedAnswer, btnElement){
     await updateDoc(doc(db, 'questions', question.id), { score: increment(-1) });
   } else {
     btnElement.classList.add('wrong');
-    // Highlight correct answer
     Array.from(answersEl.children).forEach(b => {
-      if(b.textContent === question.correct) b.classList.add('correct');
+      if(b.textContent.trim() === question.correct.trim()) b.classList.add('correct');
     });
     lastResultEl.textContent = 'Wrong — score +1. Correct answer highlighted.';
     await updateDoc(doc(db, 'questions', question.id), { score: increment(1) });
