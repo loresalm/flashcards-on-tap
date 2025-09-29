@@ -104,8 +104,8 @@ function renderQuestion(){
   const q = questions[order[index]];
   qEl.textContent = q.german;
 
-  // Shuffle options before display
-  const shuffledOptions = shuffle([...q.options]);
+  // Shuffle options before display and trim whitespace
+  const shuffledOptions = shuffle([...q.options]).map(opt => opt.trim());
 
   answersEl.innerHTML = '';
   shuffledOptions.forEach(opt => {
@@ -120,9 +120,18 @@ function renderQuestion(){
   updateProgress();
 }
 
+// Handle answer click
 async function handleAnswer(question, selectedAnswer, btnElement){
   Array.from(answersEl.children).forEach(b=>b.disabled=true);
-  const correct = selectedAnswer.trim() === question.correct.trim(); // <-- trimmed
+
+  // Verify that correct answer exists in options
+  if(!question.options.some(opt => opt.trim() === question.correct.trim())){
+    lastResultEl.textContent = `⚠ Data mismatch! Options: [${question.options.map(o=>'"'+o+'"').join(", ")}], Correct: "${question.correct}"`;
+    console.error("Data mismatch detected for question:", question);
+    return;
+  }
+
+  const correct = selectedAnswer.trim() === question.correct.trim();
 
   if(correct){
     btnElement.classList.add('correct');
@@ -130,6 +139,7 @@ async function handleAnswer(question, selectedAnswer, btnElement){
     await updateDoc(doc(db, 'questions', question.id), { score: increment(-1) });
   } else {
     btnElement.classList.add('wrong');
+    // Highlight correct answer
     Array.from(answersEl.children).forEach(b => {
       if(b.textContent.trim() === question.correct.trim()) b.classList.add('correct');
     });
