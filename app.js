@@ -33,7 +33,7 @@ let questions = [];
 let order = [];
 let index = 0;
 
-// Login
+// -------------------- LOGIN --------------------
 loginBtn.addEventListener('click', async () => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -56,16 +56,16 @@ onAuthStateChanged(auth, user => {
   }
 });
 
-// Utility to shuffle arrays
-function shuffle(a){
-  for(let i=a.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+// -------------------- UTILS --------------------
+function shuffle(array){
+  for(let i = array.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
   }
-  return a;
+  return array;
 }
 
-// Load questions from Firestore
+// -------------------- QUESTIONS --------------------
 async function loadQuestions(){
   const col = collection(db,'questions');
   const snap = await getDocs(col);
@@ -78,13 +78,12 @@ async function loadQuestions(){
   renderQuestion();
 }
 
-// Prepare the order of questions based on mode
 function prepareOrder(){
   const mode = modeSelect.value;
   if(mode === 'random'){
     order = shuffle(questions.map((_,i)=>i));
   } else {
-    order = questions.map((q,i)=>({i,score:(typeof q.score==='number'?q.score:0)}))
+    order = questions.map((q,i)=>({i, score: (typeof q.score === 'number' ? q.score : 0)}))
                      .sort((a,b)=>b.score - a.score)
                      .map(x=>x.i);
   }
@@ -92,27 +91,24 @@ function prepareOrder(){
   updateProgress();
 }
 
-// Update progress text
 function updateProgress(){
   progressEl.textContent = questions.length ? `${index+1}/${questions.length}` : '—';
 }
 
-// Render a question
 function renderQuestion(){
   if(!questions.length) return;
-
   const q = questions[order[index]];
   qEl.textContent = q.german;
 
-  // Shuffle options before display and trim whitespace
-  const shuffledOptions = shuffle([...q.options]).map(opt => opt.trim());
+  // Shuffle answers before displaying
+  const shuffledOptions = shuffle([...q.options]);
 
   answersEl.innerHTML = '';
   shuffledOptions.forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'answer';
     btn.textContent = opt;
-    btn.addEventListener('click', ()=> handleAnswer(q, opt, btn));
+    btn.addEventListener('click', () => handleAnswer(q, opt, btn));
     answersEl.appendChild(btn);
   });
 
@@ -120,11 +116,11 @@ function renderQuestion(){
   updateProgress();
 }
 
-// Handle answer click
+// -------------------- ANSWER HANDLER --------------------
 async function handleAnswer(question, selectedAnswer, btnElement){
-  Array.from(answersEl.children).forEach(b=>b.disabled=true);
+  Array.from(answersEl.children).forEach(b => b.disabled = true);
 
-  // Verify that correct answer exists in options
+  // Verify correct answer exists in options
   if(!question.options.some(opt => opt.trim() === question.correct.trim())){
     lastResultEl.textContent = `⚠ Data mismatch! Options: [${question.options.map(o=>'"'+o+'"').join(", ")}], Correct: "${question.correct}"`;
     console.error("Data mismatch detected for question:", question);
@@ -139,7 +135,7 @@ async function handleAnswer(question, selectedAnswer, btnElement){
     await updateDoc(doc(db, 'questions', question.id), { score: increment(-1) });
   } else {
     btnElement.classList.add('wrong');
-    // Highlight correct answer
+    // Highlight the correct answer button
     Array.from(answersEl.children).forEach(b => {
       if(b.textContent.trim() === question.correct.trim()) b.classList.add('correct');
     });
@@ -153,12 +149,11 @@ async function handleAnswer(question, selectedAnswer, btnElement){
   if(modeSelect.value === 'difficult') prepareOrder();
 }
 
-// Next button
-nextBtn.addEventListener('click', ()=>{
+// -------------------- EVENT LISTENERS --------------------
+nextBtn.addEventListener('click', () => {
   if(!questions.length) return;
   index = (index + 1) % questions.length;
   renderQuestion();
 });
 
-// Mode change
-modeSelect.addEventListener('change', ()=>{ prepareOrder(); renderQuestion(); });
+modeSelect.addEventListener('change', () => { prepareOrder(); renderQuestion(); });
