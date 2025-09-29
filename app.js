@@ -77,11 +77,22 @@ async function loadQuestions() {
     return;
   }
 
-  // Shuffle the order of questions for front-end
-  questionOrder = shuffle(questions.map((_, i) => i));
-  index = 0;
-
+  prepareOrder();
   renderQuestion();
+}
+
+function prepareOrder() {
+  const mode = modeSelect.value;
+  if (mode === 'random') {
+    questionOrder = shuffle(questions.map((_, i) => i));
+  } else {
+    // Difficult mode: sort by score (highest first)
+    questionOrder = questions.map((q, i) => ({ i, score: (typeof q.score === 'number' ? q.score : 0) }))
+                           .sort((a, b) => b.score - a.score)
+                           .map(x => x.i);
+  }
+  index = 0;
+  updateProgress();
 }
 
 function updateProgress() {
@@ -129,6 +140,7 @@ async function handleAnswer(question, selectedAnswer, btnElement) {
     await updateDoc(doc(db, 'questions', question.id), { score: increment(-1) });
   } else {
     btnElement.classList.add('wrong');
+    // Highlight the correct answer
     Array.from(answersEl.children).forEach(b => {
       if (b.textContent.trim() === question.correct.trim()) b.classList.add('correct');
     });
@@ -138,6 +150,11 @@ async function handleAnswer(question, selectedAnswer, btnElement) {
 
   if (typeof question.score !== 'number') question.score = 0;
   question.score += correct ? -1 : 1;
+
+  // Reorder questions if in difficult mode
+  if (modeSelect.value === 'difficult') {
+    prepareOrder();
+  }
 }
 
 // -------------------- EVENT LISTENERS --------------------
@@ -148,8 +165,6 @@ nextBtn.addEventListener('click', () => {
 });
 
 modeSelect.addEventListener('change', () => {
-  // If mode affects question ordering, re-shuffle here
-  questionOrder = shuffle(questions.map((_, i) => i));
-  index = 0;
+  prepareOrder();
   renderQuestion();
 });
