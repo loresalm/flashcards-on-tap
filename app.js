@@ -1,14 +1,15 @@
-import { firebaseConfig } from "./firebase-config.js";
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
-import { getFirestore, collection, getDocs, doc, updateDoc, increment } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-
+const firebaseConfig = {
+  apiKey: "AIzaSyDoarG7jt0kIUgHBzW8TDZhv9c-ZpdE6JA",
+  authDomain: "flashcards-on-tap.firebaseapp.com",
+  databaseURL: "https://flashcards-on-tap-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "flashcards-on-tap",
+  storageBucket: "flashcards-on-tap.firebasestorage.app",
+  messagingSenderId: "1045049294286",
+  appId: "1:1045049294286:web:d0b4c3db360f31175ebf9f"
+};
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 let questions = [];
 let order = [];
@@ -20,6 +21,34 @@ const answersEl = document.getElementById('answers');
 const nextBtn = document.getElementById('next');
 const progressEl = document.getElementById('progress');
 const lastResultEl = document.getElementById('lastResult');
+const loginDiv = document.getElementById('login');
+const quizDiv = document.getElementById('quiz');
+const loginBtn = document.getElementById('loginBtn');
+const loginError = document.getElementById('loginError');
+
+// Login handler
+loginBtn.addEventListener('click', async () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  try {
+    await signInWithEmailAndPassword(auth, email, password);
+    loginError.textContent = "";
+  } catch (err) {
+    loginError.textContent = "Login failed: " + err.message;
+  }
+});
+
+// Watch auth state
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginDiv.style.display = "none";
+    quizDiv.style.display = "block";
+    loadQuestions();
+  } else {
+    loginDiv.style.display = "block";
+    quizDiv.style.display = "none";
+  }
+});
 
 function shuffle(a){
   for(let i=a.length-1;i>0;i--){
@@ -32,10 +61,9 @@ function shuffle(a){
 async function loadQuestions(){
   const col = collection(db,'questions');
   const snap = await getDocs(col);
-  console.log("Docs found:", snap.size);
   questions = snap.docs.map(d => ({id: d.id, ...d.data()}));
   if(!questions.length){
-    qEl.textContent = 'No questions found in Firestore. See README to seed sample data.';
+    qEl.textContent = 'No questions found in Firestore.';
     return;
   }
   prepareOrder();
@@ -87,7 +115,7 @@ async function handleAnswer(question, answerIndex, btnElement){
     btnElement.classList.add('wrong');
     const correctBtn = answersEl.children[question.correctIndex];
     if(correctBtn) correctBtn.classList.add('correct');
-    lastResultEl.textContent = 'Wrong — score +1. Correct answer highlighted.';
+    lastResultEl.textContent = 'Wrong — score +1.';
     await updateDoc(doc(db, 'questions', question.id), { score: increment(1) });
   }
 
@@ -104,8 +132,3 @@ nextBtn.addEventListener('click', ()=>{
 });
 
 modeSelect.addEventListener('change', ()=>{ prepareOrder(); renderQuestion(); });
-
-loadQuestions().catch(err=>{
-  qEl.textContent = 'Error loading questions: ' + err.message;
-  console.error(err);
-});
