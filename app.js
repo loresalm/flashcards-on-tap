@@ -1,3 +1,8 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDoarG7jt0kIUgHBzW8TDZhv9c-ZpdE6JA",
   authDomain: "flashcards-on-tap.firebaseapp.com",
@@ -7,14 +12,12 @@ const firebaseConfig = {
   messagingSenderId: "1045049294286",
   appId: "1:1045049294286:web:d0b4c3db360f31175ebf9f"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-let questions = [];
-let order = [];
-let index = 0;
-
+// UI elements
 const modeSelect = document.getElementById('mode');
 const qEl = document.getElementById('question');
 const answersEl = document.getElementById('answers');
@@ -26,7 +29,11 @@ const quizDiv = document.getElementById('quiz');
 const loginBtn = document.getElementById('loginBtn');
 const loginError = document.getElementById('loginError');
 
-// Login handler
+let questions = [];
+let order = [];
+let index = 0;
+
+// Login
 loginBtn.addEventListener('click', async () => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -38,7 +45,6 @@ loginBtn.addEventListener('click', async () => {
   }
 });
 
-// Watch auth state
 onAuthStateChanged(auth, user => {
   if (user) {
     loginDiv.style.display = "none";
@@ -50,6 +56,7 @@ onAuthStateChanged(auth, user => {
   }
 });
 
+// Utility to shuffle arrays
 function shuffle(a){
   for(let i=a.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
@@ -58,6 +65,7 @@ function shuffle(a){
   return a;
 }
 
+// Load questions from Firestore
 async function loadQuestions(){
   const col = collection(db,'questions');
   const snap = await getDocs(col);
@@ -70,6 +78,7 @@ async function loadQuestions(){
   renderQuestion();
 }
 
+// Prepare the order of questions based on mode
 function prepareOrder(){
   const mode = modeSelect.value;
   if(mode === 'random'){
@@ -83,29 +92,38 @@ function prepareOrder(){
   updateProgress();
 }
 
+// Update progress text
 function updateProgress(){
   progressEl.textContent = questions.length ? `${index+1}/${questions.length}` : '—';
 }
 
+// Render a question
 function renderQuestion(){
   if(!questions.length) return;
+
   const q = questions[order[index]];
   qEl.textContent = q.german;
+
+  // Shuffle options before display
+  const shuffledOptions = shuffle([...q.options]);
+
   answersEl.innerHTML = '';
-  q.options.forEach((opt,i)=>{
+  shuffledOptions.forEach(opt => {
     const btn = document.createElement('button');
     btn.className = 'answer';
     btn.textContent = opt;
-    btn.addEventListener('click', ()=> handleAnswer(q, i, btn));
+    btn.addEventListener('click', ()=> handleAnswer(q, opt, btn));
     answersEl.appendChild(btn);
   });
+
   lastResultEl.textContent = '';
   updateProgress();
 }
 
-async function handleAnswer(question, answerIndex, btnElement){
+// Handle answer click
+async function handleAnswer(question, selectedAnswer, btnElement){
   Array.from(answersEl.children).forEach(b=>b.disabled=true);
-  const correct = (answerIndex === question.correctIndex);
+  const correct = (selectedAnswer === question.correct);
 
   if(correct){
     btnElement.classList.add('correct');
@@ -113,9 +131,11 @@ async function handleAnswer(question, answerIndex, btnElement){
     await updateDoc(doc(db, 'questions', question.id), { score: increment(-1) });
   } else {
     btnElement.classList.add('wrong');
-    const correctBtn = answersEl.children[question.correctIndex];
-    if(correctBtn) correctBtn.classList.add('correct');
-    lastResultEl.textContent = 'Wrong — score +1.';
+    // Highlight correct answer
+    Array.from(answersEl.children).forEach(b => {
+      if(b.textContent === question.correct) b.classList.add('correct');
+    });
+    lastResultEl.textContent = 'Wrong — score +1. Correct answer highlighted.';
     await updateDoc(doc(db, 'questions', question.id), { score: increment(1) });
   }
 
@@ -125,10 +145,12 @@ async function handleAnswer(question, answerIndex, btnElement){
   if(modeSelect.value === 'difficult') prepareOrder();
 }
 
+// Next button
 nextBtn.addEventListener('click', ()=>{
   if(!questions.length) return;
   index = (index + 1) % questions.length;
   renderQuestion();
 });
 
+// Mode change
 modeSelect.addEventListener('change', ()=>{ prepareOrder(); renderQuestion(); });
