@@ -30,7 +30,7 @@ const loginBtn = document.getElementById('loginBtn');
 const loginError = document.getElementById('loginError');
 
 let questions = [];
-let order = [];
+let questionOrder = [];
 let index = 0;
 
 // -------------------- LOGIN --------------------
@@ -57,50 +57,44 @@ onAuthStateChanged(auth, user => {
 });
 
 // -------------------- UTILS --------------------
-function shuffle(array){
-  for(let i = array.length - 1; i > 0; i--){
+function shuffle(array) {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return array;
+  return arr;
 }
 
 // -------------------- QUESTIONS --------------------
-async function loadQuestions(){
-  const col = collection(db,'questions');
+async function loadQuestions() {
+  const col = collection(db, 'questions');
   const snap = await getDocs(col);
-  questions = snap.docs.map(d => ({id: d.id, ...d.data()}));
-  if(!questions.length){
+  questions = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  if (!questions.length) {
     qEl.textContent = 'No questions found in Firestore.';
     return;
   }
-  prepareOrder();
+
+  // Shuffle the order of questions for front-end
+  questionOrder = shuffle(questions.map((_, i) => i));
+  index = 0;
+
   renderQuestion();
 }
 
-function prepareOrder(){
-  const mode = modeSelect.value;
-  if(mode === 'random'){
-    order = shuffle(questions.map((_,i)=>i));
-  } else {
-    order = questions.map((q,i)=>({i, score: (typeof q.score === 'number' ? q.score : 0)}))
-                     .sort((a,b)=>b.score - a.score)
-                     .map(x=>x.i);
-  }
-  index = 0;
-  updateProgress();
+function updateProgress() {
+  progressEl.textContent = questions.length ? `${index + 1}/${questions.length}` : '—';
 }
 
-function updateProgress(){
-  progressEl.textContent = questions.length ? `${index+1}/${questions.length}` : '—';
-}
+function renderQuestion() {
+  if (!questions.length) return;
 
-function renderQuestion(){
-  if(!questions.length) return;
-  const q = questions[order[index]];
+  const q = questions[questionOrder[index]];
   qEl.textContent = q.german;
 
-  // Shuffle answers before displaying
+  // Shuffle answers for this question
   const shuffledOptions = shuffle([...q.options]);
 
   answersEl.innerHTML = '';
@@ -117,43 +111,45 @@ function renderQuestion(){
 }
 
 // -------------------- ANSWER HANDLER --------------------
-async function handleAnswer(question, selectedAnswer, btnElement){
+async function handleAnswer(question, selectedAnswer, btnElement) {
   Array.from(answersEl.children).forEach(b => b.disabled = true);
 
   // Verify correct answer exists in options
-  if(!question.options.some(opt => opt.trim() === question.correct.trim())){
-    lastResultEl.textContent = `⚠ Data mismatch! Options: [${question.options.map(o=>'"'+o+'"').join(", ")}], Correct: "${question.correct}"`;
+  if (!question.options.some(opt => opt.trim() === question.correct.trim())) {
+    lastResultEl.textContent = `⚠ Data mismatch! Options: [${question.options.map(o => '"' + o + '"').join(", ")}], Correct: "${question.correct}"`;
     console.error("Data mismatch detected for question:", question);
     return;
   }
 
   const correct = selectedAnswer.trim() === question.correct.trim();
 
-  if(correct){
+  if (correct) {
     btnElement.classList.add('correct');
     lastResultEl.textContent = 'Correct — score −1 (good!).';
     await updateDoc(doc(db, 'questions', question.id), { score: increment(-1) });
   } else {
     btnElement.classList.add('wrong');
-    // Highlight the correct answer button
     Array.from(answersEl.children).forEach(b => {
-      if(b.textContent.trim() === question.correct.trim()) b.classList.add('correct');
+      if (b.textContent.trim() === question.correct.trim()) b.classList.add('correct');
     });
     lastResultEl.textContent = 'Wrong — score +1. Correct answer highlighted.';
     await updateDoc(doc(db, 'questions', question.id), { score: increment(1) });
   }
 
-  if(typeof question.score !== 'number') question.score = 0;
+  if (typeof question.score !== 'number') question.score = 0;
   question.score += correct ? -1 : 1;
-
-  if(modeSelect.value === 'difficult') prepareOrder();
 }
 
 // -------------------- EVENT LISTENERS --------------------
 nextBtn.addEventListener('click', () => {
-  if(!questions.length) return;
+  if (!questions.length) return;
   index = (index + 1) % questions.length;
   renderQuestion();
 });
 
-modeSelect.addEventListener('change', () => { prepareOrder(); renderQuestion(); });
+modeSelect.addEventListener('change', () => {
+  // If mode affects question ordering, re-shuffle here
+  questionOrder = shuffle(questions.map((_, i) => i));
+  index = 0;
+  renderQuestion();
+});
