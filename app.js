@@ -136,7 +136,7 @@ async function handleAnswer(question, selectedAnswer, btnElement) {
 
   if (correct) {
     btnElement.classList.add('correct');
-    lastResultEl.textContent = 'Correct — score −1 (good!).';
+    lastResultEl.textContent = 'Correct';
     await updateDoc(doc(db, 'questions', question.id), { score: increment(-1) });
   } else {
     btnElement.classList.add('wrong');
@@ -144,7 +144,7 @@ async function handleAnswer(question, selectedAnswer, btnElement) {
     Array.from(answersEl.children).forEach(b => {
       if (b.textContent.trim() === question.correct.trim()) b.classList.add('correct');
     });
-    lastResultEl.textContent = 'Wrong — score +1. Correct answer highlighted.';
+    lastResultEl.textContent = 'Wrong — ' + question.correct;
     await updateDoc(doc(db, 'questions', question.id), { score: increment(1) });
   }
 
